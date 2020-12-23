@@ -2,6 +2,7 @@ package chat;
 
 import java.io.*;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class ClientHandler implements Runnable, Closeable {
@@ -23,18 +24,17 @@ public class ClientHandler implements Runnable, Closeable {
     private final ObjectOutputStream out;
     private boolean running;
     private byte [] buffer;
+    private ArrayList<Message> chatHistory = new ArrayList<>();
 
     public ClientHandler(Socket socket, ChatServer chatServer) throws IOException, ClassNotFoundException {
         this.chatServer = chatServer;
         this.socket = socket;
         this.out = new ObjectOutputStream(socket.getOutputStream());
         this.is = new ObjectInputStream(socket.getInputStream());
-        Message message = (Message) is.readObject();
-        userName = message.getAuthor();
+        userName = "user " + cnt;
         cnt++;
         running = true;
         buffer = new byte[256];
-        out.writeObject(Message.of(userName, "OK"));
         out.flush();
     }
 
@@ -49,17 +49,31 @@ public class ClientHandler implements Runnable, Closeable {
         while (running) {
             try {
                 Message message = (Message) is.readObject();
+                chatHistory.add(message);
                 String[] data = message.getMessage().split(" ");
                 String command = data[0];
                 switch (command){
                     case "/auth":
-                        chatServer.broadCast(Message.of(userName, " connected"));
+                        System.out.println("авторизация");
+                        int counter = chatServer.authUser(data[1], data[2]);
+                        System.out.println(counter);
+                        if(counter!=0) {
+                            this.userName = data[1];
+                            chatServer.broadCast(Message.of(userName, "connected"));
+                        }
                         continue;
+                    case "/registr":
+                        System.out.println("регистрация");
+                        chatServer.regUser(data[1], data[2]);
+                        this.userName = data[1];
+                        chatServer.broadCast(Message.of(userName, "connected"));
                     case "/left": chatServer.broadCast(Message.of(userName, " Left chat\n"));
+                                FileHistoryService.getInstance().save(chatHistory, userName + ".txt");
                                 chatServer.kickClient(this);
                                 continue;
                     case "/changeNick":  String oldName = userName;
                         userName = data[1];
+                        chatServer.changeNick(oldName, userName);
                         String msg = String.format("User %s change name to %s", oldName, userName);
                         sendMessage(Message.of(userName, msg));
                         continue;
@@ -99,6 +113,8 @@ public class ClientHandler implements Runnable, Closeable {
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Exception while read");
                 break;
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
             }
         }
     }

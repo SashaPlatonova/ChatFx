@@ -20,10 +20,9 @@ public class RegistrationController {
 
     public void enter(ActionEvent actionEvent) throws IOException, SQLException, ClassNotFoundException {
 
-        DBHandler db = new DBHandler();
-        db.addUser(login.getText(), password.getText());
-        Network.getInstance().write(Message.of(login.getText(),"/auth "));
-        MockAuthServiceImpl.getInstance().addUser(login.getText(), password.getText());
+        Network.getInstance().write(Message.of(login.getText(),"/registr " +
+                login.getText() + " " + password.getText()));
+        System.out.println("Пользователь отправил запрос о регистрации");
         Parent chat = FXMLLoader.load(getClass().getResource("chat.fxml"));
         Stage stage = new Stage();
         stage.setTitle("Сетевой чат");

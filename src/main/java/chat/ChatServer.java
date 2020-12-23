@@ -5,13 +5,15 @@ import chat.Message;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class ChatServer {
 
-    private final int PORT = 8180;
+    private final int PORT = 8080;
     private boolean running;
     private ConcurrentLinkedDeque<ClientHandler> clients = new ConcurrentLinkedDeque<>();
     private int counter = 0;
@@ -48,7 +50,7 @@ public class ChatServer {
     public void broadCast(Message message) throws IOException {
         for (ClientHandler client: clients) {
             if (client.getUserName().equals(message.getAuthor())){
-                client.sendMessage(Message.of("/my"," " ));
+                client.sendMessage(Message.of("/my",message.getMessage() ));
                 continue;
             }
             client.sendMessage(message);
@@ -93,6 +95,26 @@ public class ChatServer {
                 }
             }
         }
+    }
+
+    public int authUser(String login, String pass) throws SQLException, ClassNotFoundException {
+        int count = 0;
+        DBHandler db = new DBHandler();
+        ResultSet res = db.getUser(login, pass);
+        while (res.next()){
+            count++;
+        }
+        return count;
+    }
+
+    public void regUser(String login, String pass) throws SQLException, ClassNotFoundException {
+        DBHandler db = new DBHandler();
+        db.addUser(login, pass);
+    }
+
+    public void changeNick(String oldLog, String newLog) throws SQLException, ClassNotFoundException {
+        DBHandler db = new DBHandler();
+        db.changeNick(oldLog, newLog);
     }
     public static void main(String[] args) {
         new ChatServer();
