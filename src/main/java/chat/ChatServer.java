@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class ChatServer {
 
-    private final int PORT = 8189;
+    private final int PORT = 8180;
     private boolean running;
     private ConcurrentLinkedDeque<ClientHandler> clients = new ConcurrentLinkedDeque<>();
     private int counter = 0;
@@ -32,6 +32,7 @@ public class ChatServer {
                 System.out.println("Connected user: " + counter);
             }
         } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
             System.out.println("Server was broken");
         }
     }

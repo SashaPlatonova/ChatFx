@@ -7,15 +7,21 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class AuthController {
     public TextField login;
     public TextField password;
 
-    public void enter(ActionEvent actionEvent) throws IOException {
-        boolean auth = MockAuthServiceImpl.getInstance()
-                .auth(login.getText(), password.getText());
-        if (auth) {
+    public void enter(ActionEvent actionEvent) throws IOException, SQLException, ClassNotFoundException {
+        int countUser = 0;
+        if(!login.getText().equals("") && !password.getText().equals("")){
+            countUser = authUser(login.getText(), password.getText());
+        }
+//        boolean auth = MockAuthServiceImpl.getInstance()
+//                .auth(login.getText(), password.getText());
+        if (countUser!=0) {
             Parent chat = FXMLLoader.load(getClass().getResource("chat.fxml"));
             Stage stage = new Stage();
             stage.setTitle("Сетевой чат");
@@ -27,6 +33,16 @@ public class AuthController {
             login.setText("WRONG LOGIN OR PASSWORD");
             password.clear();
         }
+    }
+
+    private int authUser(String text, String text1) throws SQLException, ClassNotFoundException {
+        int count = 0;
+        DBHandler db = new DBHandler();
+        ResultSet res = db.getUser(text, text1);
+        while (res.next()){
+            count++;
+        }
+        return count;
     }
 
     public void reg(ActionEvent actionEvent) throws IOException {
