@@ -11,6 +11,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
 public class ChatController implements Initializable{
@@ -44,6 +46,16 @@ public class ChatController implements Initializable{
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         userName = Network.getInstance().getUserName();
+        ArrayList<Message> history = FileHistoryService.getInstance().load(userName + ".txt");
+        for (Message msg : history) {
+            if(msg.getAuthor().equals("/my")){
+                myOutput.appendText(msg.toString());
+                output.appendText("\n");
+            } else {
+                output.appendText(msg.toString());
+                myOutput.appendText("\n");
+            }
+        }
         read = new ChatReader(output, myOutput, Network.getInstance().getInputStream());
         read.start();
     }

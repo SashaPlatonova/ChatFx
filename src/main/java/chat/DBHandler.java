@@ -43,7 +43,13 @@ public class DBHandler {
         return resultSet;
     }
     
-    public void changeNick(String oldLog, String newLog){
+    public void changeNick(String oldLog, String newLog) throws SQLException, ClassNotFoundException {
+        String sqlUpdate = "UPDATE " + TABLE + " SET " + LOGIN + " = ?"
+                + "WHERE " + LOGIN + " = ?";
+        PreparedStatement statement = getConnection().prepareStatement(sqlUpdate);
+        statement.setString(1, newLog);
+        statement.setString(2, oldLog);
+        statement.executeUpdate();
         // TODO: 21.12.2020
     }
 }

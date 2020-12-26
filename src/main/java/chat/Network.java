@@ -13,7 +13,7 @@ public class Network {
 
     private Network() {
         try {
-            Socket socket = new Socket("localhost", 8189);
+            Socket socket = new Socket("localhost", 8080);
             out = new ObjectOutputStream(socket.getOutputStream());
             is = new ObjectInputStream(socket.getInputStream());
         } catch (Exception e) {

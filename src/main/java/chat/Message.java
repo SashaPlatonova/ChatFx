@@ -8,7 +8,7 @@ public class Message implements Serializable {
     private Date sendAt;
     private String author;
     private String message;
-    private static final SimpleDateFormat format = new SimpleDateFormat("[dd.MM.yy HH:mm");
+    private static final SimpleDateFormat format = new SimpleDateFormat("[dd.MM.yy HH:mm]");
 
 
     public static Message of(String author, String message) {
